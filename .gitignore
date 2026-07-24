@@ -1,0 +1,10 @@
+# Models and audio artifacts
+*.bin
+*.wav
+models/
+
+# Build output
+/example/example
+
+# Logs
+*.log
