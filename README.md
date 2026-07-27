@@ -56,6 +56,35 @@ sample rate, language, threads) with sensible defaults from the constructors.
 Recording stops when the context is cancelled, so an interactive caller can
 start recording on one keypress and stop on the next by cancelling the context.
 
+## Native backend (CGO)
+
+The default `CLITranscriber` shells out to `whisper-cli`. An optional in-process
+backend links whisper.cpp directly, loading the model once and reusing it across
+calls. It is behind the `whisper_cgo` build tag, so the default build stays
+CGO-free.
+
+```go
+tr, err := gowhisper.NewNativeTranscriber("/path/to/ggml-base.bin")
+if err != nil {
+	log.Fatal(err)
+}
+defer tr.Close()
+text, err := tr.Transcribe(ctx, wav)
+```
+
+Build and test it with the tag:
+
+```
+go build -tags whisper_cgo ./...
+go test  -tags whisper_cgo ./...
+```
+
+Requirements: `whisper-cpp` installed with its headers and libraries (Homebrew
+provides them under `/opt/homebrew`), and CGO enabled. The `#cgo` directives in
+`transcriber_native.go` point at the Homebrew paths; adjust them for other
+prefixes. On Apple Silicon this requires a native arm64 Go toolchain — an
+amd64 (Rosetta) toolchain cannot link the arm64 whisper libraries.
+
 ## Example
 
 ```
